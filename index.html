@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- SEO优化 -->
+    <meta name="description" content="免费在线文本编辑器，支持复制、清空、搜索替换和深色模式功能">
+    <meta name="keywords" content="文本编辑器,在线编辑器,文本工具,搜索替换,深色模式">
+    <title>极简文本编辑器 - 免费在线编辑工具</title>
+    <!-- 添加网站图标 -->
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='10' y='10' width='80' height='80' rx='5' ry='5' fill='%234a86e8'/%3E%3Cpath d='M30 40 L70 40 M30 50 L70 50 M30 60 L70 60' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='80' cy='25' r='8' fill='%23ff6b6b'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <!-- 内嵌SVG logo -->
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="60" height="60">
+            <rect x="10" y="10" width="80" height="80" rx="5" ry="5" fill="#4a86e8" />
+            <path d="M30 40 L70 40 M30 50 L70 50 M30 60 L70 60" stroke="white" stroke-width="5" stroke-linecap="round" />
+            <circle cx="80" cy="25" r="8" fill="#ff6b6b" />
+        </svg>
+        <h1>极简文本编辑器</h1>
+    </header>
+    
+    <div class="editor-container">
+        <div class="toolbar">
+            <button id="copy-all">复制全部</button>
+            <button id="clear">清空</button>
+            <button id="find-replace">搜索替换</button>
+            <button id="theme-toggle">深色模式</button>
+            <span id="char-count">0 字符</span>
+        </div>
+        
+        <div id="search-panel" class="search-panel">
+            <div class="search-controls">
+                <input type="text" id="find-input" placeholder="查找内容">
+                <input type="text" id="replace-input" placeholder="替换为">
+                <button id="find-next">查找下一个</button>
+                <button id="replace-btn">替换</button>
+                <button id="replace-all">全部替换</button>
+                <button id="close-search">关闭</button>
+            </div>
+            <div id="search-status"></div>
+        </div>
+        
+        <textarea id="text-editor" placeholder="粘贴文本或直接输入内容..." autofocus></textarea>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

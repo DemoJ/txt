@@ -1,50 +1,259 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-CN" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- SEO优化 -->
-    <meta name="description" content="免费在线文本编辑器，支持复制、清空、搜索替换和深色模式功能">
-    <meta name="keywords" content="文本编辑器,在线编辑器,文本工具,搜索替换,深色模式">
-    <title>极简文本编辑器 - 免费在线编辑工具</title>
+    <meta name="description" content="网页TXT - 极简在线文本编辑器，沉浸式写作体验">
+    <meta name="keywords" content="文本编辑器,在线编辑器,极简写作,网页TXT,在线记事本">
+    <title>网页TXT - 极简在线文本编辑器</title>
     <!-- 添加网站图标 -->
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='10' y='10' width='80' height='80' rx='5' ry='5' fill='%234a86e8'/%3E%3Cpath d='M30 40 L70 40 M30 50 L70 50 M30 60 L70 60' stroke='white' stroke-width='5' stroke-linecap='round'/%3E%3Ccircle cx='80' cy='25' r='8' fill='%23ff6b6b'/%3E%3C/svg%3E">
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header>
-        <!-- 内嵌SVG logo -->
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="60" height="60">
-            <rect x="10" y="10" width="80" height="80" rx="5" ry="5" fill="#4a86e8" />
-            <path d="M30 40 L70 40 M30 50 L70 50 M30 60 L70 60" stroke="white" stroke-width="5" stroke-linecap="round" />
-            <circle cx="80" cy="25" r="8" fill="#ff6b6b" />
-        </svg>
-        <h1>极简文本编辑器</h1>
-    </header>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%234f46e5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z'/%3E%3Cpolyline points='14 2 14 8 20 8'/%3E%3C/svg%3E">
     
-    <div class="editor-container">
-        <div class="toolbar">
-            <button id="copy-all">复制全部</button>
-            <button id="clear">清空</button>
-            <button id="find-replace">搜索替换</button>
-            <button id="theme-toggle">深色模式</button>
-            <span id="char-count">0 字符</span>
-        </div>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+                    },
+                    boxShadow: {
+                        'dock': '0 10px 40px -10px rgba(0, 0, 0, 0.1), 0 0 0 1px rgba(0, 0, 0, 0.02)',
+                        'dock-dark': '0 10px 40px -10px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.05)',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* 隐藏默认滚动条但保留功能 */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        <div id="search-panel" class="search-panel">
-            <div class="search-controls">
-                <input type="text" id="find-input" placeholder="查找内容">
-                <input type="text" id="replace-input" placeholder="替换为">
-                <button id="find-next">查找下一个</button>
-                <button id="replace-btn">替换</button>
-                <button id="replace-all">全部替换</button>
-                <button id="close-search">关闭</button>
+        /* Dock 动画 */
+        .dock-item {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dock-item:hover {
+            transform: translateY(-4px);
+        }
+        .dock-tooltip {
+            opacity: 0;
+            transform: translateY(10px) translateX(-50%);
+            transition: all 0.2s;
+            pointer-events: none;
+        }
+        .dock-item:hover .dock-tooltip {
+            opacity: 1;
+            transform: translateY(0) translateX(-50%);
+        }
+    </style>
+</head>
+<body class="bg-[#fcfcfc] text-gray-800 dark:bg-[#0f1115] dark:text-gray-200 min-h-screen flex flex-col font-sans transition-colors duration-500 overflow-hidden relative selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100">
+    
+    <!-- Minimal Header -->
+    <header class="fixed top-0 left-0 w-full z-40 pointer-events-none">
+        <!-- 限制宽度为 max-w-4xl 并居中，与编辑器对齐 -->
+        <div class="max-w-4xl mx-auto px-8 sm:px-12 py-6 flex items-center justify-between">
+            <!-- Brand -->
+            <div class="flex items-center gap-3 pointer-events-auto opacity-80 hover:opacity-100 transition-opacity">
+                <div class="w-8 h-8 rounded-xl bg-indigo-500/10 dark:bg-indigo-400/10 flex items-center justify-center backdrop-blur-sm border border-indigo-500/10 dark:border-indigo-400/10">
+                    <i data-lucide="file-text" class="w-4 h-4 text-indigo-600 dark:text-indigo-400"></i>
+                </div>
+                <h1 class="text-sm font-semibold tracking-wide text-gray-500 dark:text-gray-400">网页TXT</h1>
             </div>
-            <div id="search-status"></div>
+            
+            <!-- Stats -->
+            <div class="pointer-events-auto">
+                <span id="char-count" class="text-xs font-mono text-gray-400 dark:text-gray-600 bg-gray-100/50 dark:bg-gray-800/50 px-3 py-1.5 rounded-full backdrop-blur-sm">0 字符</span>
+            </div>
         </div>
+    </header>
+
+    <!-- Main Editor Area -->
+    <main class="flex-1 w-full h-full relative z-0 flex justify-center overflow-y-auto overflow-x-hidden scroll-smooth" id="main-container">
+        <div class="w-full max-w-4xl pt-32 pb-48 px-8 sm:px-12">
+            <!-- Rich Text Editor -->
+            <div id="text-editor"
+                 contenteditable="true"
+                 class="w-full min-h-[calc(100vh-20rem)] outline-none text-lg leading-loose text-gray-700 dark:text-gray-300 empty:before:content-[attr(placeholder)] empty:before:text-gray-300 dark:empty:before:text-gray-700 prose prose-slate dark:prose-invert max-w-none prose-p:my-2 prose-headings:font-semibold prose-headings:my-4"
+                 placeholder="在此处开始书写..."
+                 spellcheck="false"
+                 autofocus></div>
+        </div>
+    </main>
+
+    <!-- Floating Dock (Toolbar) -->
+    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end gap-2 pointer-events-none">
         
-        <textarea id="text-editor" placeholder="粘贴文本或直接输入内容..." autofocus></textarea>
+        <!-- Dock Container -->
+        <div class="pointer-events-auto flex items-center gap-1 p-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-dock dark:shadow-dock-dark rounded-2xl ring-1 ring-black/5 dark:ring-white/10 transform transition-all hover:scale-[1.01]">
+            
+            <!-- Formatting Group -->
+            <div class="flex items-center gap-1 px-1">
+                <button id="btn-bold" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="bold" class="w-4 h-4"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">粗体</span>
+                </button>
+                <button id="btn-italic" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="italic" class="w-4 h-4"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">斜体</span>
+                </button>
+                <!-- Heading Dropup -->
+                <div class="relative group">
+                    <button class="dock-item w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                        <i data-lucide="heading" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Invisible bridge to prevent menu closing -->
+                    <div class="absolute bottom-full left-0 w-full h-2 bg-transparent"></div>
+                    
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-12 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 hidden group-hover:flex flex-col p-1 gap-1">
+                        <button id="btn-h1" class="w-full aspect-square flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="一级标题">H1</button>
+                        <button id="btn-h2" class="w-full aspect-square flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="二级标题">H2</button>
+                        <button id="btn-h3" class="w-full aspect-square flex items-center justify-center text-xs font-bold text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="三级标题">H3</button>
+                        <button id="btn-p" class="w-full aspect-square flex items-center justify-center text-xs text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors" title="正文">
+                             <i data-lucide="pilcrow" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            <!-- Utility Group -->
+            <div class="flex items-center gap-1 px-1">
+                <button id="copy-all" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="copy" class="w-4 h-4"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">复制全文</span>
+                </button>
+                <button id="find-replace" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">搜索</span>
+                </button>
+                <div class="relative group">
+                    <button class="dock-item w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                        <i data-lucide="download" class="w-4 h-4"></i>
+                    </button>
+                    <!-- Invisible bridge to prevent menu closing -->
+                    <div class="absolute bottom-full left-0 w-full h-2 bg-transparent"></div>
+                    
+                    <!-- Download Dropup -->
+                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-32 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 hidden group-hover:block p-1">
+                        <button id="download-txt" class="flex items-center gap-2 w-full text-left px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="file-text" class="w-3 h-3"></i> .TXT
+                        </button>
+                        <button id="download-md" class="flex items-center gap-2 w-full text-left px-3 py-2 text-xs font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                            <i data-lucide="file-code" class="w-3 h-3"></i> .MD
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            <!-- System Group -->
+            <div class="flex items-center gap-1 px-1">
+                <button id="theme-toggle" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-500 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-white/10 transition-colors">
+                    <i data-lucide="moon" class="w-4 h-4 dark:hidden"></i>
+                    <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-gray-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">主题</span>
+                </button>
+                <button id="clear" class="dock-item relative group w-10 h-10 flex items-center justify-center rounded-xl text-gray-400 hover:text-red-600 hover:bg-red-50 dark:text-gray-500 dark:hover:text-red-400 dark:hover:bg-red-900/20 transition-colors">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span class="dock-tooltip absolute -top-10 left-1/2 bg-red-600 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap">清空</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Combined Controls (Text Size & Zoom) -->
+        <div class="pointer-events-auto hidden sm:flex items-center gap-1 p-1.5 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-dock dark:shadow-dock-dark rounded-xl ring-1 ring-black/5 dark:ring-white/10 h-[58px]">
+            <!-- Text Size -->
+            <button id="btn-font-minus" class="w-8 h-full flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-white/10 dark:hover:text-white transition-colors" title="减小字号">
+                <i data-lucide="minus" class="w-3 h-3"></i>
+            </button>
+            <div class="flex flex-col items-center justify-center w-8 px-1">
+                <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider">Text</span>
+                <span id="font-size-display" class="text-[10px] font-mono text-gray-600 dark:text-gray-300 select-none">18</span>
+            </div>
+            <button id="btn-font-plus" class="w-8 h-full flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-white/10 dark:hover:text-white transition-colors" title="增大字号">
+                <i data-lucide="plus" class="w-3 h-3"></i>
+            </button>
+
+            <!-- Divider -->
+            <div class="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1"></div>
+
+            <!-- Zoom Controls -->
+            <button id="btn-zoom-minus" class="w-8 h-full flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-white/10 dark:hover:text-white transition-colors" title="缩小视图">
+                <i data-lucide="zoom-out" class="w-3 h-3"></i>
+            </button>
+            <div class="flex flex-col items-center justify-center w-10 px-1">
+                <span class="text-[8px] text-gray-400 uppercase font-bold tracking-wider">Zoom</span>
+                <span id="zoom-display" class="text-[10px] font-mono text-gray-600 dark:text-gray-300 select-none">100%</span>
+            </div>
+            <button id="btn-zoom-plus" class="w-8 h-full flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-white/10 dark:hover:text-white transition-colors" title="放大视图">
+                <i data-lucide="zoom-in" class="w-3 h-3"></i>
+            </button>
+        </div>
+
     </div>
+
+    <!-- Global Toast Notification -->
+    <div id="toast-container" class="fixed top-24 left-1/2 -translate-x-1/2 z-[60] pointer-events-none transition-all duration-300 opacity-0 translate-y-[-20px]">
+        <div class="bg-gray-900/90 dark:bg-white/90 text-white dark:text-gray-900 px-6 py-3 rounded-xl shadow-2xl backdrop-blur-md font-medium text-sm flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-4 h-4"></i>
+            <span id="toast-message">提示信息</span>
+        </div>
+    </div>
+
+    <!-- Search Modal (Centered Overlay) -->
+    <div id="search-panel" class="hidden fixed inset-0 z-50 flex items-start justify-center pt-32 px-4">
+        <!-- Backdrop -->
+        <div id="close-search-backdrop" class="absolute inset-0 bg-white/50 dark:bg-black/50 backdrop-blur-sm transition-opacity"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative w-full max-w-lg bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-800 p-4 transform transition-all animate-in fade-in zoom-in-95 duration-200">
+            <div class="flex flex-col gap-3">
+                <div class="flex items-center gap-2">
+                    <div class="relative flex-1 group">
+                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="find-input" placeholder="查找..." class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200">
+                    </div>
+                    <div class="flex items-center gap-1">
+                        <button id="find-next" class="p-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors" title="下一个">
+                            <i data-lucide="arrow-down" class="w-4 h-4"></i>
+                        </button>
+                        <button id="close-search" class="p-2.5 rounded-xl text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="flex items-center gap-2">
+                     <div class="relative flex-1 group">
+                        <i data-lucide="pencil-line" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                        <input type="text" id="replace-input" placeholder="替换为..." class="w-full pl-9 pr-3 py-2.5 rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all placeholder-gray-400 dark:text-gray-200">
+                    </div>
+                    <button id="replace-btn" class="px-4 py-2.5 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 text-xs font-semibold dark:bg-indigo-500/10 dark:text-indigo-400 dark:hover:bg-indigo-500/20 transition-colors">
+                        替换
+                    </button>
+                    <button id="replace-all" class="px-4 py-2.5 rounded-xl bg-gray-100 text-gray-600 hover:bg-gray-200 text-xs font-semibold dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700 transition-colors">
+                        全替
+                    </button>
+                </div>
+                
+                <div id="search-status" class="text-xs text-center text-indigo-500 dark:text-indigo-400 h-4 font-medium"></div>
+            </div>
+        </div>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>

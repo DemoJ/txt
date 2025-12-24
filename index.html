@@ -60,7 +60,7 @@
 <body class="bg-[#fcfcfc] text-gray-800 dark:bg-[#0f1115] dark:text-gray-200 h-screen flex flex-col font-sans transition-colors duration-500 overflow-hidden relative selection:bg-indigo-100 selection:text-indigo-900 dark:selection:bg-indigo-900 dark:selection:text-indigo-100">
     
     <!-- Minimal Header -->
-    <header class="fixed top-0 left-0 w-full z-40 pointer-events-none">
+    <header id="app-header" class="fixed top-0 left-0 w-full z-40 pointer-events-none transition-all duration-500 ease-in-out">
         <!-- 限制宽度为 max-w-4xl 并居中，与编辑器对齐 -->
         <div class="max-w-4xl mx-auto px-8 sm:px-12 py-6 flex items-center justify-between">
             <!-- Brand -->
@@ -80,7 +80,7 @@
 
     <!-- Main Editor Area -->
     <main class="flex-1 w-full h-full relative z-0 flex justify-center overflow-y-auto overflow-x-hidden scroll-smooth" id="main-container">
-        <div class="w-full max-w-4xl pt-32 pb-48 px-8 sm:px-12">
+        <div class="w-full max-w-4xl pt-32 px-8 sm:px-12">
             <!-- Rich Text Editor -->
             <div id="text-editor"
                  contenteditable="true"
@@ -88,11 +88,14 @@
                  placeholder="在此处开始书写..."
                  spellcheck="false"
                  autofocus></div>
+            
+            <!-- 底部占位符，确保最后一行文字能滚动到工具栏上方 -->
+            <div class="h-96 w-full select-none pointer-events-none"></div>
         </div>
     </main>
 
     <!-- Floating Dock (Toolbar) -->
-    <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end gap-2 pointer-events-none">
+    <div id="app-dock" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 flex items-end gap-2 pointer-events-none transition-all duration-500 ease-in-out translate-y-0">
         
         <!-- Dock Container -->
         <div class="pointer-events-auto flex items-center gap-1 p-2 bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border border-white/20 dark:border-white/5 shadow-dock dark:shadow-dock-dark rounded-2xl ring-1 ring-black/5 dark:ring-white/10 transform transition-all hover:scale-[1.01]">

@@ -16,6 +16,8 @@ const closeSearchBackdrop = document.getElementById('close-search-backdrop');
 const searchStatus = document.getElementById('search-status');
 const toastContainer = document.getElementById('toast-container');
 const toastMessage = document.getElementById('toast-message');
+const appHeader = document.getElementById('app-header');
+const appDock = document.getElementById('app-dock');
 
 // 格式化工具栏按钮
 const btnBold = document.getElementById('btn-bold');
@@ -538,6 +540,7 @@ function showToast(message) {
         toastContainer.classList.add('opacity-0', 'translate-y-[-20px]');
     }, 3000);
 }
+
 
 // 初始化主题
 function initTheme() {

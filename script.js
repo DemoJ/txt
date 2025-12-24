@@ -55,12 +55,34 @@ function insertTextAtCursor(text) {
     if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         range.deleteContents();
-        const textNode = document.createTextNode(text);
-        range.insertNode(textNode);
         
-        // 将光标移动到插入文本的末尾
-        range.setStartAfter(textNode);
-        range.setEndAfter(textNode);
+        const fragment = document.createDocumentFragment();
+        const lines = text.split(/\r\n|\r|\n/);
+        let lastNode = null;
+
+        lines.forEach((line, index) => {
+            if (line) {
+                const textNode = document.createTextNode(line);
+                fragment.appendChild(textNode);
+                lastNode = textNode;
+            }
+            if (index < lines.length - 1) {
+                const br = document.createElement('br');
+                fragment.appendChild(br);
+                lastNode = br;
+            }
+        });
+
+        if (fragment.hasChildNodes()) {
+            range.insertNode(fragment);
+            
+            // 将光标移动到插入文本的末尾
+            if (lastNode) {
+                range.setStartAfter(lastNode);
+                range.setEndAfter(lastNode);
+            }
+        }
+        
         selection.removeAllRanges();
         selection.addRange(range);
         
